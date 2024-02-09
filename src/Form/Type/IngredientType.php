@@ -2,6 +2,7 @@
 
 namespace App\Form\Type;
 
+use App\Entity\Category;
 use App\Entity\Ingredient;
 use App\Entity\Storage;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -21,6 +22,7 @@ class IngredientType extends AbstractType
             ->add('quantity', TextType::class)
             ->add('remainingQuantity', TextType::class)
             ->add('expirationDate', DateType::class, [ 'required' => false ])
+            ->add('category', EntityType::class, [ 'class' => Category::class, 'choice_label' => 'name' ])
             ->add('storage', EntityType::class, [ 'class' => Storage::class, 'choice_label' => 'name' ])
             ->add('save', SubmitType::class)
         ;
