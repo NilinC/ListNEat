@@ -20,9 +20,13 @@ class IngredientController extends AbstractController
     {
         $ingredients = $this->entityManager->getRepository(Ingredient::class)->findAll();
 
+        if (!empty($ingredients)) {
+            $ingredients = $this->ingredientRepository->sortIngredientsByCategories($ingredients);
+        }
+
         return $this->render(
             'ingredient/list.html.twig',
-            [ 'ingredients' => $ingredients ]
+            [ 'ingredientsList' => $ingredients ]
         );
     }
 
