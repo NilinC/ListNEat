@@ -48,6 +48,21 @@ class IngredientRepository extends ServiceEntityRepository
         ;
     }
 
+    public function getIngredientsWithShortExpirationDate(): array
+    {
+        $interval = date_interval_create_from_date_string('1 week');
+        $date_from_1_week = date_add(new \DateTime(), $interval);
+        $date_from_1_week = $date_from_1_week->format('Y-m-d');
+
+        return $this->createQueryBuilder('i')
+            ->where('i.expirationDate < :date_from_1_week')
+            ->orderBy('i.expirationDate', 'ASC')
+            ->setParameter('date_from_1_week', $date_from_1_week)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     public function sortIngredientsByFilter(array $ingredients, string $filter): array
     {
         $sortedIngredients = [];
@@ -82,6 +97,4 @@ class IngredientRepository extends ServiceEntityRepository
     {
         return self::DEFAULT_FILTER;
     }
-
-
 }

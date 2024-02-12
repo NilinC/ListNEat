@@ -21,17 +21,20 @@ class IngredientController extends AbstractController
     #[Route('/{filter?}', name: 'list_ingredients', methods: ['GET'])]
     public function list(Request $request): Response
     {
+        $ingredientsWithShortExpirationDate = [];
         $ingredients = $this->ingredientRepository->getIngredients();
         $filter = $request->attributes->get('filter') ?: $this->ingredientRepository->getDefaultFilter();
 
         if (!empty($ingredients)) {
             $ingredients = $this->ingredientRepository->sortIngredientsByFilter($ingredients, $filter);
+            $ingredientsWithShortExpirationDate = $this->ingredientRepository->getIngredientsWithShortExpirationDate();
         }
 
         return $this->render(
             'ingredient/list.html.twig',
             [
                 'ingredientsList' => $ingredients,
+                'ingredientsWithShortExpirationDate' => $ingredientsWithShortExpirationDate,
                 'filter' => $filter
             ]
         );
