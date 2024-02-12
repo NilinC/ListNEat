@@ -1,40 +1,46 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
+    <div class="btn-group" role="group" aria-label="Basic example">
+        <a href="{{ path('list_ingredients', { 'filter': 'category' }) }}" class="btn btn-primary">Catégorie</a>
+        <a href="{{ path('list_ingredients', { 'filter': 'storage' }) }}" class="btn btn-primary">Rangement</a>
+        <a href="{{ path('list_ingredients', { 'filter': 'expiration_date' }) }}" class="btn btn-primary">DLC</a>
+    </div>
+
     {% for category, ingredients in ingredientsList %}
-    <table class="table">
-        <thead>
-        <tr>
-            <th scope="col">{{ category }}</th>
-        </tr>
-        </thead>
-        <tbody>
-            <table class="table table-hover">
-                <thead>
-                <tr>
-                    <th scope="col">Ingrédient</th>
-                    <th scope="col">Quantité</th>
-                    <th scope="col">Quantité restante</th>
-                    <th scope="col">Date de péremption</th>
-                    <th scope="col"></th>
-                </tr>
-                </thead>
-                <tbody>
-                    {% for ingredient in ingredients %}
-                        <tr>
-                            <td>{{ ingredient.name }}</td>
-                            <td>{{ ingredient.quantity }}</td>
-                            <td>{{ ingredient.remainingQuantity }}</td>
-                            <td>{{ ingredient.expirationDate is empty ? "" : ingredient.expirationDate | date('d-m-Y') }}</td>
-                            <td>
-                                <a href="{{ path('update_ingredient', { 'id': ingredient.id }) }}"><i class="bi bi-pen"></i></a>
-                                <a href="{{ path('remove_ingredient', { 'id': ingredient.id }) }}"><i class="bi bi-x"></i></a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </tbody>
-    </table>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">{{ category }}</th>
+            </tr>
+            </thead>
+            <tbody>
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">Ingrédient</th>
+                        <th scope="col">Quantité</th>
+                        <th scope="col">Quantité restante</th>
+                        <th scope="col">Date de péremption</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for ingredient in ingredients %}
+                            <tr>
+                                <td>{{ ingredient.name }}</td>
+                                <td>{{ ingredient.quantity }}</td>
+                                <td>{{ ingredient.remainingQuantity }}</td>
+                                <td>{{ ingredient.expirationDate is empty ? "" : ingredient.expirationDate | date('d-m-Y') }}</td>
+                                <td>
+                                    <a href="{{ path('update_ingredient', { 'id': ingredient.id }) }}"><i class="bi bi-pen"></i></a>
+                                    <a href="{{ path('remove_ingredient', { 'id': ingredient.id }) }}"><i class="bi bi-x"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </tbody>
+        </table>
     {% endfor %}
 {% endblock %}

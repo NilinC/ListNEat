@@ -17,6 +17,11 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class IngredientRepository extends ServiceEntityRepository
 {
+    const DEFAULT_FILTER = 'category';
+    const CATEGORY = 'category';
+    const STORAGE = 'storage';
+    CONST EXPIRATION_DATE = 'expiration_date';
+
     public function __construct(ManagerRegistry $registry, private readonly EntityManagerInterface $entityManager)
     {
         parent::__construct($registry, Ingredient::class);
@@ -34,13 +39,49 @@ class IngredientRepository extends ServiceEntityRepository
         $this->entityManager->flush();
     }
 
-    public function sortIngredientsByCategories(array $ingredients): array
+    public function getIngredients(): array
     {
-        $sortedIngredientsByCategory = [];
-        foreach ($ingredients as $ingredient) {
-            $sortedIngredientsByCategory[$ingredient->getCategory()->getName()][] = $ingredient;
+        return $this->createQueryBuilder('i')
+            ->orderBy('i.expirationDate', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function sortIngredientsByFilter(array $ingredients, string $filter): array
+    {
+        $sortedIngredients = [];
+
+        if (self::CATEGORY === $filter) {
+            foreach ($ingredients as $ingredient) {
+                $sortedIngredients[$ingredient->getCategory()->getName()][] = $ingredient;
+            }
+        } elseif (self::STORAGE === $filter) {
+            foreach ($ingredients as $ingredient) {
+                $sortedIngredients[$ingredient->getStorage()->getName()][] = $ingredient;
+            }
+        } elseif (self::EXPIRATION_DATE === $filter) {
+            foreach ($ingredients as $ingredient) {
+                $dateKey = "";
+                if ($ingredient->getExpirationDate()) {
+                    $dateKey = $ingredient->getExpirationDate()->format('m-Y');
+                }
+
+                $sortedIngredients[$dateKey][] = $ingredient;
+            }
+        } else {
+            // renvoyer un message comme quoi le filtrage n'existe pas
+
+            return $ingredients;
         }
 
-        return $sortedIngredientsByCategory;
+        return $sortedIngredients;
     }
+
+    public function getDefaultFilter(): string
+    {
+        return self::DEFAULT_FILTER;
+    }
+
+
 }
