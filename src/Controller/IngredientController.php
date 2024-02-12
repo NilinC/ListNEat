@@ -13,28 +13,35 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class IngredientController extends AbstractController
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager, private readonly IngredientRepository $ingredientRepository) {}
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly IngredientRepository $ingredientRepository
+    ) {}
 
-    #[Route('/', name: 'list_ingredients', methods: ['GET'])]
-    public function list(): Response
+    #[Route('/{filter?}', name: 'list_ingredients', methods: ['GET'])]
+    public function list(Request $request): Response
     {
-        $ingredients = $this->entityManager->getRepository(Ingredient::class)->findAll();
+        $ingredients = $this->ingredientRepository->getIngredients();
+        $filter = $request->attributes->get('filter') ?: $this->ingredientRepository->getDefaultFilter();
 
         if (!empty($ingredients)) {
-            $ingredients = $this->ingredientRepository->sortIngredientsByCategories($ingredients);
+            $ingredients = $this->ingredientRepository->sortIngredientsByFilter($ingredients, $filter);
         }
 
         return $this->render(
             'ingredient/list.html.twig',
-            [ 'ingredientsList' => $ingredients ]
+            [
+                'ingredientsList' => $ingredients,
+                'filter' => $filter
+            ]
         );
     }
 
-    #[Route('/update?id', name: 'update_ingredient', methods: ['GET', 'POST'])]
+    #[Route('/update/{id?}', name: 'update_ingredient', methods: ['GET', 'POST'])]
     public function update(Request $request): Response
     {
-        $parameter = $request->query->get('id');
-        $ingredient = $this->entityManager->getRepository(Ingredient::class)->findOneBy([ 'id' => $parameter]);
+        $parameter = $request->attributes->get('id') ?: null;
+        $ingredient = $this->entityManager->getRepository(Ingredient::class)->findOneBy([ 'id' => $parameter ]);
 
         if (!$ingredient) {
             $ingredient = new Ingredient();
@@ -58,15 +65,14 @@ class IngredientController extends AbstractController
         );
     }
 
-    #[Route('/remove?id', name: 'remove_ingredient', methods: [ 'GET', 'DELETE' ])]
+    #[Route('/remove/{id}', name: 'remove_ingredient', methods: [ 'GET', 'DELETE' ])]
     public function remove(Request $request): Response
     {
-        $parameter = $request->query->get('id');
+        $parameter = $request->attributes->get('id');
         $ingredient = $this->entityManager->getRepository(Ingredient::class)->findOneBy([ 'id' => $parameter]);
 
         $this->ingredientRepository->removeIngredient($ingredient);
 
         return $this->redirectToRoute('list_ingredients');
-
     }
 }
